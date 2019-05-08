@@ -46,6 +46,10 @@
             this.dbBlockchainBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.dbBlockchainDataSet1 = new Blockchain.dbBlockchainDataSet1();
             this.dbBlockchainTableAdapter = new Blockchain.dbBlockchainDataSet1TableAdapters.dbBlockchainTableAdapter();
+            this.txtTxHash = new System.Windows.Forms.TextBox();
+            this.txtToAddress = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtKey = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbBlockchainBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbBlockchainDataSet1)).BeginInit();
@@ -56,7 +60,7 @@
             this.txtTransaction.Location = new System.Drawing.Point(753, 67);
             this.txtTransaction.Multiline = true;
             this.txtTransaction.Name = "txtTransaction";
-            this.txtTransaction.Size = new System.Drawing.Size(412, 190);
+            this.txtTransaction.Size = new System.Drawing.Size(162, 24);
             this.txtTransaction.TabIndex = 1;
             // 
             // label1
@@ -73,9 +77,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(753, 48);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(55, 13);
+            this.label2.Size = new System.Drawing.Size(43, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Create TX";
+            this.label2.Text = "Amount";
             // 
             // btnNewblock
             // 
@@ -182,11 +186,49 @@
             // 
             this.dbBlockchainTableAdapter.ClearBeforeFill = true;
             // 
+            // txtTxHash
+            // 
+            this.txtTxHash.Location = new System.Drawing.Point(716, 323);
+            this.txtTxHash.Multiline = true;
+            this.txtTxHash.Name = "txtTxHash";
+            this.txtTxHash.ReadOnly = true;
+            this.txtTxHash.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtTxHash.Size = new System.Drawing.Size(545, 310);
+            this.txtTxHash.TabIndex = 10;
+            // 
+            // txtToAddress
+            // 
+            this.txtToAddress.Location = new System.Drawing.Point(753, 113);
+            this.txtToAddress.Name = "txtToAddress";
+            this.txtToAddress.Size = new System.Drawing.Size(480, 20);
+            this.txtToAddress.TabIndex = 11;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(753, 94);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(61, 13);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "To Address";
+            // 
+            // txtKey
+            // 
+            this.txtKey.Location = new System.Drawing.Point(756, 161);
+            this.txtKey.Multiline = true;
+            this.txtKey.Name = "txtKey";
+            this.txtKey.Size = new System.Drawing.Size(477, 96);
+            this.txtKey.TabIndex = 13;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1273, 721);
+            this.Controls.Add(this.txtKey);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.txtToAddress);
+            this.Controls.Add(this.txtTxHash);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.txtBlockcount);
@@ -224,6 +266,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn currenthashDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn previoushashDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn blockcountDataGridViewTextBoxColumn;
+        private System.Windows.Forms.TextBox txtTxHash;
+        private System.Windows.Forms.TextBox txtToAddress;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox txtKey;
     }
 }
 

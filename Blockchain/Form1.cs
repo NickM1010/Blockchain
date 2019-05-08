@@ -1,28 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Security.Cryptography;
-using System.Data.SqlClient;
 using System.Configuration;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Security.Cryptography;
+using System.Text;
+using System.Windows.Forms;
+using System.Numerics;
+using System.Globalization;
+using Org.BouncyCastle.Asn1.Sec;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+using NBitcoin;
 
 namespace Blockchain
 {
+    /// <summary>
+    /// Will not work activate the functions before
+    /// After that it will not work and the window will freeze :D
+    /// </summary>
     public partial class Form1 : Form
     {
         //Variables
         List<float[,,,]> Blockchain = new List<float[,,,]>();
         string PreviousHash = "0";
         string CurrentHash;
-        string Transaktion;
-        string TransaktionHash;
+        string Amount;
+        string AmountHash;
         string GenesisBlockHash = "c423b0dcb3697b21d846dbf01f6f2438fbc973078bd8fc671551f5b98e8af0f0";
         int BlockCount = 0;
+        int nounce = 0;
+        long Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        string test;
+        string PrivateKey = "";
+        string PublicKey = "";
+        string MiningReward = "";
+        string MiniRewardAddress = "";
+        string ToAddress = "";
+        string FromAddress = "";
+        int difficulty = 2;
+        string MinedBlock;
+
 
         SqlConnection connection;
         string connectionString;
@@ -31,6 +50,14 @@ namespace Blockchain
         {
             InitializeComponent();
             connectionString = ConfigurationManager.ConnectionStrings["Blockchain.Properties.Settings.dbBlockchainConnectionString"].ConnectionString;
+            Key privateKey = new Key();
+            PubKey publicKey = privateKey.PubKey;
+            var publicKeyHash = publicKey.Hash;
+            txtKey.Text += Convert.ToString(publicKeyHash) + "\r\n";
+            var mainNetAddress = publicKeyHash.GetAddress(Network.Main);
+            var testNetAddress = publicKeyHash.GetAddress(Network.TestNet);
+            txtKey.Text += Convert.ToString(mainNetAddress) + "\r\n";
+            txtKey.Text += Convert.ToString(testNetAddress) + "\r\n";
         }
 
         /// <summary>
@@ -44,15 +71,15 @@ namespace Blockchain
             //GenesisBlock generate block
             if (BlockCount == 0)
             {
-                Transaktion = "Das ist ein Test";   //First TX
+                Amount = "Das ist ein Test";   //First TX
                 BlockCount = 0;                    //No Previous Block          //GenesisBlock = 0
-                CurrentHash = ComputeSha256Hash(Transaktion);
-                TransaktionHash = CurrentHash;
+                CurrentHash = ComputeSha256Hash(Amount);
+                AmountHash = CurrentHash;
 
                 //Check if Hardcoded is equal Block 0 at new Start.
                 if (GenesisBlockHash != CurrentHash)
                 {
-                    MessageBox.Show("Wrong GenesisBlockHash. The Hardcoded hash is " + GenesisBlockHash + " and the new generated is " + CurrentHash);
+                    MessageBox.Show("Wrong GenesisBlockHash. The Hardcoded hash is " + GenesisBlockHash + " and the new generated is " + CurrentHash + " please change the GenesisBlock in your Sourcecode!");
                     return;
                 }
             }
@@ -60,10 +87,12 @@ namespace Blockchain
             // Generate new Block (non GenesisBlock)
             else if (BlockCount != 0)
             {
-                Transaktion = txtTransaction.Text;
-                TransaktionHash = ComputeSha256Hash(Transaktion);
-                var NewHash = TransaktionHash + PreviousHash;
-                CurrentHash = ComputeSha256Hash(NewHash);
+                Amount = txtTransaction.Text;
+                AmountHash = ComputeSha256Hash(Amount);
+                ToAddress = txtToAddress.Text;
+                FromAddress = PublicKey;
+                long Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                //CurrentHash = MineBlock(difficulty);
                 //Hash is to short/long
                 if (CurrentHash.Length != 64)
                 {
@@ -71,9 +100,15 @@ namespace Blockchain
                 }
             }
 
+            else
+            {
+                MessageBox.Show("Error! Blockchain is corrupted. Can't create Block lower than 0 and higher than endless.");    //It sounds scary :D
+            }
+
             txtBlockcount.Text = Convert.ToString(BlockCount);
             txtBlockchain.Text += CurrentHash.ToString() + "\r\n";
-            write_db();
+            txtTxHash.Text += test + "\r\n";
+            //write_db();
             this.dbBlockchainTableAdapter.Fill(this.dbBlockchainDataSet1.dbBlockchain);
             BlockCount++;
             PreviousHash = CurrentHash;
@@ -82,14 +117,14 @@ namespace Blockchain
 
         string ComputeSha256Hash(string rawData)
         {
-            // Create a SHA256   
+           // Create a SHA256
             using (SHA256 sha256Hash = SHA256.Create())
             {
-                // ComputeHash - returns byte array  
+               // ComputeHash - returns byte array
                 byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
 
-                // Convert byte array to a string   
-                StringBuilder builder = new StringBuilder();
+               // Convert byte array to a string
+               StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < bytes.Length; i++)
                 {
                     builder.Append(bytes[i].ToString("x2"));
@@ -98,15 +133,46 @@ namespace Blockchain
             }
         }
 
+        /// <summary>
+        /// How?!?!?!?!?!?!?!?
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        ////string MineBlock(int difficulty)
+        ////{
+
+        ////    var NewHash = (AmountHash + PreviousHash + Convert.ToString(nounce) + Convert.ToString(Timestamp) + ToAddress + FromAddress);
+        ////    object[] array = { difficulty + 1 }; /*array[difficulty + 1]*/
+        ////    string s1 = string.Join("0", array);
+        ////    while (NewHash.Substring(0, difficulty) != s1)
+        ////    {
+        ////        nounce++;
+        ////        NewHash = (AmountHash + PreviousHash + Convert.ToString(nounce) + Convert.ToString(Timestamp) + ToAddress + FromAddress);
+
+        ////       // Create a SHA256
+        ////        using (SHA256 sha256Hash = SHA256.Create())
+        ////        {
+        ////           // ComputeHash - returns byte array
+        ////            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(NewHash));
+
+        ////           // Convert byte array to a string
+        ////           StringBuilder builder = new StringBuilder();
+        ////            for (int i = 0; i < bytes.Length; i++)
+        ////            {
+        ////                builder.Append(bytes[i].ToString("x2"));
+        ////            }
+        ////            MinedBlock = builder.ToString();
+        ////        }
+        ////    }
+        ////    return MinedBlock;
+        ////}
+
         private void Form1_Load(object sender, EventArgs e)
         {
             // TODO: Diese Codezeile lädt Daten in die Tabelle "dbBlockchainDataSet1.dbBlockchain". Sie können sie bei Bedarf verschieben oder entfernen.
             this.dbBlockchainTableAdapter.Fill(this.dbBlockchainDataSet1.dbBlockchain);
-            //Load db in GridViewList
-            //get_db();
             //Get latest Id from db
-            getLatestID_db();
-            // MessageBox.Show(latestID);
+            getInfo_db();
         }
 
         /// <summary>
@@ -127,8 +193,8 @@ namespace Blockchain
                     cmd.Parameters.Add("@Blockcount", System.Data.SqlDbType.NVarChar);
 
                     //Cmd.Parameters["@CustomerID"].Value = Convert.ToInt32(textbox1.Text);
-                    cmd.Parameters["@Transcation"].Value = Transaktion;
-                    cmd.Parameters["@Transcationhash"].Value = TransaktionHash;
+                    cmd.Parameters["@Transcation"].Value = Amount;
+                    cmd.Parameters["@Transcationhash"].Value = AmountHash;
                     cmd.Parameters["@Currenthash"].Value = CurrentHash;
                     cmd.Parameters["@Previoushash"].Value = PreviousHash;
                     cmd.Parameters["@Blockcount"].Value = Convert.ToString(BlockCount);
@@ -142,29 +208,10 @@ namespace Blockchain
         }
 
         /// <summary>
-        /// Test function
-        /// Is for tests
-        /// </summary>
-        //private void get_db()
-        //{
-        //    using (connection = new SqlConnection(connectionString))
-        //    using (SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM dbBlockchain", connection))
-        //    {
-        //        DataTable serverTable = new DataTable();
-        //        adapter.Fill(serverTable);
-
-        //        lstExplorer.DisplayMember = "Currenthash";
-        //        lstExplorer.ValueMember = "Id";
-        //        lstExplorer.DataSource = serverTable;
-        //    }
-        //}
-
-
-        /// <summary>
         /// Recives the latest ID from Blockchain to generate the following Block
         /// Recives the latest hash from Blockchain to generate the following Block
         /// </summary>
-        private void getLatestID_db()
+        private void getInfo_db()
         {
             using (connection = new SqlConnection(connectionString))
             {
@@ -192,30 +239,16 @@ namespace Blockchain
             }
         }
 
-        //private void getLastHash_db()
-        //{
-        //    using (connection = new SqlConnection(connectionString))
-        //    using (SqlCommand cmd = new SqlCommand("SELECT * FROM dbBlockchain WHERE id = @latestID", connection))
-        //    {
-        //        connection.Open();
-        //        cmd.Parameters.Add("@latestID", System.Data.SqlDbType.NVarChar);
-        //        cmd.Parameters["@latestID"].Value = latestID;
+        private void BtnKey_Click(object sender, EventArgs e)
+        {
+            RSACryptoServiceProvider rSA = new RSACryptoServiceProvider();
+            var privateKey = rSA.ToXmlString(true);
+            var publicKey = rSA.ToXmlString(false);
 
-        //        using (SqlDataReader reader = cmd.ExecuteReader())
-        //        {
-        //            while (reader.Read())
-        //            {
-        //                for (int i = 0; i < 1; i++)
-        //                {
-        //                    var _latestHash = (reader.GetValue(i));
-        //                    MessageBox.Show(Convert.ToString(_latestHash));
-        //                }
-        //            }
-        //        }
+            var EncodedPrivateKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(privateKey));
+            var EncodedPublicKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(publicKey));
 
-        //        connection.Close();
-        //    }
-        //}
+        }
 
     }
 }
